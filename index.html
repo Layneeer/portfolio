@@ -268,8 +268,8 @@
 
         /*
         STRATEGIA DLA NAGŁÓWKA:
-        Nagłówek jest fixed i zawsze widoczny, z jednolitym tłem i cieniem od początku.
-        Brak dynamicznych zmian tła na scrollu.
+        Nagłówek jest fixed i zawsze widoczny. Obraz banner.jpg jest jego tłem.
+        Brak box-shadow bezpośrednio na headerze.
         */
         header {
             position: fixed; /* PRZYPIĘTY DO GÓRY EKRANU */
@@ -277,16 +277,11 @@
             z-index: 100; /* Wysoki z-index dla nagłówka */
             top: 0;
             left: 0;
-            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7); /* Nowy, bardziej rozmyty i rozciągnięty cień */
-            border-bottom-left-radius: 0.75rem;
-            border-bottom-right-radius: 0.75rem;
-            background-color: rgba(31, 41, 55, 0.95); /* Zmieniono na rgba z wysoką przezroczystością, aby blur był widoczny */
-            backdrop-filter: blur(10px); /* Dodano z powrotem efekt rozmycia */
-            -webkit-backdrop-filter: blur(10px); /* WebKit compatibility */
-            overflow: hidden; /* WAŻNE: To już nie będzie wpływać na menu mobilne, bo zostało przeniesione */
+            overflow: hidden;
+            background-color: transparent; /* Nagłówek jest przezroczysty, tło zapewni pseudoelement */
         }
 
-        /* Pseudoelement ::before dla nagłówka - to on będzie zawierał obrazek tła i gradient cienia */
+        /* Pseudoelement ::before dla nagłówka - obraz banner.jpg (czysty plik) */
         header::before {
             content: '';
             position: absolute;
@@ -294,33 +289,38 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 25%), /* Nowy gradient od dołu do 25% wysokości */
-                              url('banner.jpg'); /* Oryginalny obrazek tła */
-            background-position: bottom, center center; /* Pozycjonowanie gradientu na dole, obrazka w centrum */
-            background-repeat: no-repeat, no-repeat;
-            background-size: 100% 100%, cover; /* Gradient na 100% wysokości, obrazek pokrywa resztę */
+            background-image: url('banner.jpg'); /* Czysty obrazek tła */
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
             z-index: -1; /* Umieść tło pod zawartością nagłówka */
-            opacity: 1;
         }
 
 
         /* Nowe style dla sekcji Home */
         #home {
-            min-height: 100vh; /* Upewnij się, że jest co najmniej na wysokość ekranu */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 5rem 1rem; /* Dodano padding */
-            border-bottom-left-radius: 2rem;
-            border-bottom-right-radius: 2rem;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
-            position: relative; /* Ważne dla pozycjonowania pseudoelementu */
-            overflow: hidden; /* Zapobiega przewijaniu tła poza sekcją */
-            background-color: transparent;
+            position: relative;
+            overflow: hidden;
+            background-color: transparent; /* Usunięto background-color, aby tło było jednolite */
+            /* Domyślne style dla mobile: brak paddingu, aby tekst zaczynał się od razu pod menu */
+            min-height: auto;
+            padding-top: 0; /* Zmieniono na 0 */
+            padding-bottom: 0; /* Zmieniono na 0 */
         }
 
-        /* Pseudoelement ::before dla sekcji Home - to on będzie zawierał rozmyte tło z overlayem */
+        @media (min-width: 768px) { /* md breakpoint for desktop-like behavior */
+            #home {
+                min-height: 100vh; /* Pełna wysokość widoku na desktopie */
+                padding-top: 5rem; /* Przywróć desktopowy padding */
+                padding-bottom: 5rem; /* Przywróć desktopowy padding */
+            }
+        }
+
+        /* Pseudoelement ::before dla sekcji Home - rozmyte tło (obrazek.jpg) */
         #home::before {
             content: '';
             position: absolute;
@@ -328,7 +328,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('obrazek.jpg');
+            background-image: url('obrazek.jpg'); /* Obrazek tła */
             background-attachment: scroll;
             background-position: center center;
             background-repeat: no-repeat;
@@ -402,7 +402,7 @@
             z-index: -1; /* Umieszczenie pod zawartością sekcji */
         }
 
-        /* Dodano media query dla paddingów sekcji */
+        /* Domyślne paddingi i marginesy dla sekcji (zmieniono na mobile-first) */
         section {
             padding: 3rem 1rem; /* Domyślny padding dla sekcji (py-12) */
             border-radius: 2rem;
@@ -474,7 +474,7 @@
             <!-- Logo -->
             <a href="#home" class="block w-72 md:w-80 lg:w-96 h-auto focus:outline-none focus:ring-2 focus:ring-teal-500 rounded-lg p-1">
                 <img src="logo.png"
-                     onerror="this.onerror=null;this.src='logo.png';"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/0F766E/FFFFFF?text=Logo';"
                      alt="Logo Odnawiamy Strony Firmowe - Zamień Dziada na Kozaka" class="w-full h-auto object-contain">
             </a>
 
@@ -505,8 +505,9 @@
 
     <main> <!-- Padding jest dynamicznie dodawany do body przez JS -->
         <!-- Sekcja Home -->
-        <section id="home" class="min-h-screen flex items-center justify-center text-center py-20 px-4 rounded-b-3xl shadow-inner animate-on-scroll">
-            <div class="max-w-4xl mx-auto">
+        <section id="home" class="min-h-screen flex items-center justify-center text-center px-4 rounded-b-3xl shadow-inner animate-on-scroll">
+            <!-- Upewnij się, że ten div ma wewnętrzny padding, który zadziała na mobile -->
+            <div class="max-w-4xl mx-auto px-4 py-6 md:py-0">
                 <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-6">
                     <span class="text-teal-400">Odnawiamy Strony Firmowe:</span> Zamień Dziada na Kozaka!
                 </h1>
@@ -531,7 +532,7 @@
                 <div class="flex flex-col md:flex-row items-center md:space-x-12">
                     <div class="md:w-1/2 mb-8 md:mb-0">
                         <!-- Dodano klasę profile-neon-effect bezpośrednio do img, aby cień był stały -->
-                        <img src="zdjecie.png" onerror="this.onerror=null;this.src='zdjecie.png';" alt="Twoje zdjęcie profilowe - ekspert od modernizacji stron" class="w-full h-auto object-cover rounded-2xl profile-neon-effect">
+                        <img src="zdjecie.png" onerror="this.onerror=null;this.src='https://placehold.co/600x400/0F766E/FFFFFF?text=Twoje+zdjęcie+profilowe';" alt="Twoje zdjęcie profilowe - ekspert od modernizacji stron" class="w-full h-auto object-cover rounded-2xl profile-neon-effect">
                     </div>
                     <div class="md:w-1/2">
                         <p class="text-lg mb-6 leading-relaxed">
