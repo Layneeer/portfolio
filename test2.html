@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio web developera - odświeżanie i tworzenie nowoczesnych stron internetowych oraz sklepów e-commerce. Zamieniam dziada na kozaka! Strony responsywne, zoptymalizowane pod SEO.">
+    <meta name="keywords" content="odnawianie stron internetowych, modernizacja stron, renowacja stron, sklepy internetowe, web developer, strony responsywne, SEO, aplikacje webowe, front-end, back-end, React, Next.js, WordPress, zamień dziada na kozaka">
+    <title>Twoje Portfolio Webowe - Zamień Dziada na Kozaka!</title>
+    <!-- Ładowanie Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Konfiguracja Tailwind CSS z niestandardową czcionką Inter -->
+    <style>
+        /* Import czcionki Inter */
+        @import url('https://rsms.me/inter/inter.css');
+        html { font-family: 'Inter', sans-serif; }
+        @supports (font-variation-settings: normal) {
+            html { font-family: 'Inter var', sans-serif; }
+        }
+
+        /* Custom CSS dla przycisków menu na małych ekranach */
+        .menu-button {
+            display: none; /* Domyślnie ukryty na desktop */
+            cursor: pointer;
+            background-color: #10b981; /* teal-500 */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Upewnij się, że przycisk jest na górze w trybie mobilnym, bez nadpisywania z flexa nav */
+            z-index: 101; /* Wyższy niż nav-links */
+        }
+        .menu-button:hover {
+            background-color: #0d9488; /* Ciemniejszy teal przy najechaniu */
+        }
+        /* Ukrywamy spany dla hamburgera, skoro mamy tekst "MENU" */
+        .menu-button span {
+            display: none;
+        }
+
+        /* Style nagłówka - zawsze fixed, z tłem i rozmyciem */
+        header {
+            position: fixed;
+            width: 100%;
+            z-index: 20;
+            top: 0;
+            left: 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            background-color: rgba(31, 41, 55, 0.95); /* Ciemne tło z przezroczystością */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('banner.jpg'),
+                              linear-gradient(to bottom, transparent 80%, rgba(0, 0, 0, 0.5) 100%);
+            background-position: center center, 0% 0%;
+            background-repeat: no-repeat, no-repeat;
+            background-size: cover, cover; 
+            z-index: -1;
+            opacity: 1;
+        }
+
+        /* Media query dla menu mobilnego */
+        @media (max-width: 767px) {
+            .menu-button {
+                display: flex; /* Pokaż na mobile */
+            }
+            .nav-links {
+                display: none; /* Domyślnie ukryte na małych ekranach */
+                flex-direction: column; /* Linki w kolumnie */
+                align-items: center; /* Wyśrodkuj linki poziomo */
+                justify-content: flex-start; /* Linki od góry */
+                width: 100%;
+                background-color: #1a202c; /* Tło menu mobilnego */
+                position: fixed;
+                left: 0;
+                overflow-y: auto; /* Pozwala na przewijanie menu, jeśli jest za długie */
+                padding: 1rem 0;
+                border-bottom-left-radius: 0.75rem;
+                border-bottom-right-radius: 0.75rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                z-index: 100; /* Wysoki z-index, żeby był nad innymi elementami */
+
+                /* Dodaj przejścia dla płynnego pojawiania się */
+                transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+                transform: translateY(-100%); /* Start poza ekranem */
+                opacity: 0; /* Całkowicie przezroczyste na początku */
+            }
+            .nav-links.active {
+                display: flex; /* Pokaż, gdy klasa 'active' jest dodana */
+                transform: translateY(0); /* Przesuń na pozycję */
+                opacity: 1; /* Pokaż */
+            }
+            .nav-links a {
+                padding: 0.75rem 1.5rem;
+                width: 100%;
+                text-align: center;
+                border-radius: 0.5rem;
+                color: #f7fafc;
+                transition: background-color 0.3s ease-in-out;
+            }
+            .nav-links a:hover {
+                background-color: #2d3748;
+            }
+        }
+
+        /* Styl dla przycisku "Przewiń do góry" */
+        #scrollTopBtn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(20px);
+            z-index: 50;
+        }
+        #scrollTopBtn.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Styl dla przycisku "KONTAKT" na desktopie */
+        #desktopContactBtn {
+            position: fixed;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: 100% 50%;
+            background-color: #0F766E;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            z-index: 50;
+            transition: right 0.5s ease-in-out;
+        }
+        #desktopContactBtn:hover {
+            right: 0.5rem;
+        }
+        @media (min-width: 1024px) {
+            #desktopContactBtn { display: block; }
+        }
+        @media (max-width: 1023px) {
+            #desktopContactBtn { display: none; }
+        }
+
+        /* Styl dla przycisku telefonu na mobile */
+        #mobilePhoneBtn {
+            position: fixed;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 60;
+        }
+        #mobilePhoneBtn:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+        @media (min-width: 768px) {
+            #mobilePhoneBtn { display: none; }
+        }
+
+        /* Style dla sekcji Home */
+        #home {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5rem 1rem;
+            border-bottom-left-radius: 2rem;
+            border-bottom-right-radius: 2rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        #home::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('obrazek.jpg');
+            background-attachment: scroll;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            filter: blur(15px);
+            -webkit-filter: blur(15px);
+            z-index: -1;
+        }
+
+        /* Style dla sekcji Usługi */
+        #services {
+            padding: 5rem 1rem;
+            background-color: transparent;
+            color: #f7fafc;
+            border-radius: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        #services::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), url('obrazek1.jpg');
+            background-attachment: scroll;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            filter: blur(15px);
+            -webkit-filter: blur(15px);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 antialiased overflow-x-hidden">
+    <!-- Nagłówek i Nawigacja -->
+    <header>
+        <nav class="container mx-auto px-4 py-4 flex items-center justify-between relative">
+            <!-- Logo -->
+            <a href="#home" class="block w-72 md:w-80 lg:w-96 h-auto focus:outline-none focus:ring-2 focus:ring-teal-500 rounded-lg p-1">
+                <img src="logo.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/000000?text=Brak+Logo';"
+                     alt="Logo Odnawiamy Strony Firmowe - Zamień Dziada na Kozaka" class="w-full h-auto object-contain">
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <button class="menu-button md:hidden absolute right-4 top-1/2 -translate-y-1/2" id="menuButton" aria-label="Przełącz menu nawigacji" aria-expanded="false">
+                MENU
+            </button>
+
+            <!-- Nav links (desktop: prawo, ukryte na mobile) -->
+            <div class="nav-links md:space-x-6 lg:space-x-8 text-lg font-medium" id="navLinks" role="navigation">
+                <a href="#home" class="text-teal-300 hover:text-teal-400 transition-colors duration-300 py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">Start</a>
+                <a href="#about" class="text-teal-300 hover:text-teal-400 transition-colors duration-300 py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">O mnie</a>
+                <a href="#portfolio" class="text-teal-300 hover:text-teal-400 transition-colors duration-300 py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">Portfolio</a>
+                <a href="#services" class="text-teal-300 hover:text-teal-400 transition-colors duration-300 py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">Usługi</a>
+                <a href="#contact" class="text-teal-300 hover:text-teal-400 transition-colors duration-300 py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">Kontakt</a>
+            </div>
+        </nav>
+    </header>
+
+    <main> <!-- Padding jest dynamicznie dodawany do body przez JS -->
+        <!-- Sekcja Home -->
+        <section id="home" class="min-h-screen flex items-center justify-center text-center py-20 px-4 rounded-b-3xl shadow-inner">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white mb-6">
+                    <span class="text-teal-400">Odnawiamy Strony Firmowe:</span> Zamień Dziada na Kozaka!
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-4 leading-relaxed">
+                    Jestem na początku drogi w kompleksowej modernizacji przestarzałych stron internetowych i tworzeniu nowoczesnych rozwiązań, które zamieniają 'dziada' w 'kozaka'. Szukam pierwszych klientów na renowację i budowę responsywnych, wysoko konwertujących witryn.
+                </p>
+                <p class="text-xl md:text-2xl text-teal-300 font-bold mb-10 leading-relaxed">
+                    Teraz robię to tylko za 300 zł – dla nowego życia Twojej firmy to żaden koszt!
+                </p>
+                <a href="#contact" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                    Skontaktuj się i Zacznijmy Transformację!
+                </a>
+            </div>
+        </section>
+
+        <!-- Sekcja O mnie -->
+        <section id="about" class="py-20 px-4 bg-gray-900 text-gray-100 rounded-3xl shadow-xl mx-auto my-12">
+            <div class="container mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 text-teal-400">O mnie – Architekt Cyfrowej Rewitalizacji</h2>
+                <div class="flex flex-col md:flex-row items-center md:space-x-12">
+                    <div class="md:w-1/2 mb-8 md:mb-0">
+                        <img src="zdjecie.png';" alt="Twoje zdjęcie profilowe - ekspert od modernizacji stron" class="w-full h-auto object-cover rounded-2xl shadow-lg">
+                    </div>
+                    <div class="md:w-1/2">
+                        <p class="text-lg mb-6 leading-relaxed">
+                            Cześć! Nazywam się [Twoje Imię i Nazwisko] i moją misją jest transformacja cyfrowa. Od [liczba] lat nie tylko tworzę nowe strony internetowe, ale przede wszystkim specjalizuję się w **rewitalizacji przestarzałych platform**, tchnąc w nie nowoczesny design, zaawansowane funkcjonalności i optymalizując je pod kątem aktualnych standardów webowych.
+                        </p>
+                        <p class="text-lg mb-6 leading-relaxed">
+                            Wierzę, że każda firma zasługuje na dynamiczną i efektywną stronę. Moje podejście to kompleksowe "odświeżanie" – od architektury kodu, przez responsywność, po wydajność SEO. Pomagam markom **zamienić dziada na kozaka**, czyli stać się szybkimi, estetycznymi i wysoko konwertującymi narzędziami biznesowymi.
+                        </p>
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-200">Moje narzędzia do rewitalizacji:</h3>
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-md">
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> HTML5, CSS3 (Tailwind CSS)</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> JavaScript (React, Next.js)</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> Node.js, Express.js</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> Bazy danych (MongoDB, PostgreSQL)</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> WordPress, WooCommerce (migracje)</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> Optymalizacja SEO & Core Web Vitals</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> Projektowanie UX/UI (re-design)</li>
+                            <li class="flex items-center"><span class="text-teal-400 mr-2">&#10003;</span> Kontrola wersji (Git, GitHub)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja Usługi -->
+        <section id="services" class="py-20 px-4 bg-gray-900 text-gray-100 rounded-3xl shadow-xl mx-auto my-12">
+            <div class="container mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 text-teal-400">Moje Usługi – Zamień Dziada na Kozaka!</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Usługa 1: Modernizacja Stron Firmowych -->
+                    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300 h-full border border-gray-600 hover:border-teal-500">
+                        <div class="text-5xl text-teal-400 mb-4">✨</div> <!-- Ikona - blask/nowość -->
+                        <h3 class="text-2xl font-bold mb-3 text-white">Modernizacja Stron Firmowych</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Tchnę nowe życie w Twoją obecną stronę firmową. Kompleksowy re-design, poprawa wydajności, responsywności i aktualizacja do najnowszych standardów webowych. Zamień swojego "dziada" w prawdziwego "kozaka" w sieci!
+                        </p>
+                        <ul class="text-left text-sm text-gray-400 mb-4 w-full">
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Audyt i analiza "dziada"</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Odświeżenie UX/UI i kodu</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Optymalizacja prędkości i SEO</li>
+                        </ul>
+                    </div>
+
+                    <!-- Usługa 2: Tworzenie Nowych Sklepów E-commerce -->
+                    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col items-center text-center transform hover:scale-105 transition-transform duration-300 h-full border border-gray-600 hover:border-teal-500">
+                        <div class="text-5xl text-teal-400 mb-4">🚀</div> <!-- Ikona - rakieta/start -->
+                        <h3 class="text-2xl font-bold mb-3 text-white">Tworzenie Nowoczesnych Sklepów E-commerce</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Buduję od podstaw wysoko konwertujące platformy sprzedażowe. Od projektu po wdrożenie, zapewniam wydajne i skalowalne rozwiązania e-commerce, które **zamienią Twoje oczekiwania w kozacki sukces!**
+                        </p>
+                        <ul class="text-left text-sm text-gray-400 mb-4 w-full">
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Indywidualny system płatności</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Zarządzanie magazynem i zamówieniami</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Integracje z systemami zewnętrznymi</li>
+                        </ul>
+                    </div>
+
+                    <!-- Usługa 3: Migracje i Optymalizacja Platform -->
+                    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 h-full border border-gray-600 hover:border-teal-500">
+                        <div class="text-5xl text-teal-400 mb-4">🔄</div> <!-- Ikona - odświeżanie/migracja -->
+                        <h3 class="text-2xl font-bold mb-3 text-white">Migracje i Optymalizacja Platform</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Pomagam w bezpiecznej migracji z przestarzałych systemów na nowoczesne platformy. Audytuję i optymalizuję istniejące strony pod kątem szybkości i SEO, by **zamienić każdą stronę z "dziada" w "kozaka"**.
+                        </p>
+                        <ul class="text-left text-sm text-gray-400 mb-4 w-full">
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Audyt techniczne i SEO</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Poprawa Core Web Vitals</li>
+                            <li class="flex items-center mb-1"><span class="text-teal-400 mr-2">&#10003;</span> Planowanie i wykonanie migracji</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja Kontakt -->
+        <section id="contact" class="py-20 px-4 bg-gray-800 text-gray-100 rounded-3xl shadow-xl mx-auto my-12">
+            <div class="container mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-12 text-teal-400">Skontaktuj Się Ze Mną – Zamieńmy Dziada na Kozaka!</h2>
+                <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+                    Masz "dziada", którego chcesz zamienić w "kozaka"? A może potrzebujesz nowej, lśniącej strony od podstaw? Napisz lub zadzwoń – chętnie pomogę!
+                </p>
+                <!-- WAŻNE: Zastąp 'YOUR_FORMSPREE_FORM_ID' swoim ID z Formspree.io -->
+                <form action="https://formspree.io/f/YOUR_FORMSPREE_FORM_ID" method="POST" class="max-w-xl mx-auto bg-gray-700 p-8 rounded-2xl shadow-xl">
+                    <div class="mb-6 text-left">
+                        <label for="name" class="block text-gray-200 text-sm font-bold mb-2">Imię i Nazwisko:</label>
+                        <input type="text" id="name" name="name" class="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-gray-300" placeholder="Wpisz swoje imię i nazwisko" required aria-label="Imię i Nazwisko">
+                    </div>
+                    <div class="mb-6 text-left">
+                        <label for="email" class="block text-gray-200 text-sm font-bold mb-2">Adres E-mail:</label>
+                        <input type="email" id="email" name="email" class="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-gray-300" placeholder="Wpisz swój adres e-mail" required aria-label="Adres E-mail">
+                    </div>
+                    <div class="mb-8 text-left">
+                        <label for="message" class="block text-gray-200 text-sm font-bold mb-2">Wiadomość:</label>
+                        <textarea id="message" name="message" rows="6" class="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-gray-300" placeholder="Opisz swój projekt lub pytanie" required aria-label="Treść wiadomości"></textarea>
+                    </div>
+                    <!-- Ukryte pole dla tematu wiadomości e-mail Formspree -->
+                    <input type="hidden" name="_subject" value="Nowa wiadomość z Twojego Portfolio!">
+                    <!-- Ukryte pole przekierowania po wysłaniu formularza. Formspree domyślnie wyświetla stronę sukcesu. Możesz tu podać swój adres URL, np. https://twojastrona.pl/dziekuje.html -->
+                    <input type="hidden" name="_next" value="https://formspree.io/thanks?next=true">
+
+                    <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                        Wyślij Wiadomość
+                    </button>
+                </form>
+                <div class="mt-12 text-lg">
+                    <p class="mb-4">Lub napisz bezpośrednio:</p>
+                    <p class="mb-2">E-mail: <a href="mailto:twoj.email@example.com" class="text-teal-400 hover:text-teal-300 transition-colors duration-300">twoj.email@example.com</a></p>
+                    <p>Telefon: <a href="tel:+48123456789" class="text-teal-400 hover:text-teal-300 transition-colors duration-300">+48 123 456 789</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja Projekty - PRZENIESIONA I ZMIENIONA NA #portfolio -->
+        <section id="portfolio" class="py-20 px-4 bg-gray-800 text-gray-100 rounded-3xl shadow-xl mx-auto my-12">
+            <div class="container mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 text-teal-400">Moje Transformacje i Nowe Horyzonty</h2>
+                <p class="text-lg text-gray-300 mb-8 leading-relaxed text-center">
+                    Jako początkujący web developer specjalizujący się w renowacji stron, z niecierpliwością czekam na pierwsze zlecenia! Poniżej znajdziesz przykładowe wizualizacje tego, jak mogę przekształcić Twoją witrynę. **To tutaj pojawi się Twój własne sukcesy "zamiany dziada na kozaka"!**
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Projekt 1: Miejsce na Twój Projekt Renowacji -->
+                    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col h-full border border-gray-600 hover:border-teal-500">
+                        <img src="https://placehold.co/600x400/0F766E/FFFFFF?text=Tu+Twój+Projekt" alt="Miniaturka miejsca na przyszły projekt" class="w-full h-48 object-cover rounded-lg mb-6 shadow-md">
+                        <h3 class="text-2xl font-bold mb-3 text-white">Miejsce na Twój Projekt Renowacji!</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Masz stronę "dziada"? To miejsce czeka, by zaprezentować jej transformację w "kozaka"! Pokażę Twój biznes w nowym, dynamicznym świetle.
+                        </p>
+                        <div class="flex flex-wrap gap-2 text-sm text-gray-400 mb-4">
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Re-design</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Optymalizacja</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Nowoczesność</span>
+                        </div>
+                        <a href="#contact" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full text-center transition-colors duration-300 self-start">
+                            Tutaj pojawi się Twój projekt!
+                        </a>
+                    </div>
+
+                    <!-- Projekt 2: Twoja Strona jako "Kozak"! -->
+                    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 h-full border border-gray-600 hover:border-teal-500">
+                        <img src="https://placehold.co/600x400/0F766E/FFFFFF?text=Kozak+Strona" alt="Miniaturka przyszłej, nowoczesnej strony" class="w-full h-48 object-cover rounded-lg mb-6 shadow-md">
+                        <h3 class="text-2xl font-bold mb-3 text-white">Twoja Strona jako "Kozak"!</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Wyobraź sobie swoją stronę jako wydajną, estetyczną i responsywną platformę. Zrealizujmy to razem! Jestem gotów na nowe wyzwania.
+                        </p>
+                        <div class="flex flex-wrap gap-2 text-sm text-gray-400 mb-4">
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Responsywność</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">SEO</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Konwersja</span>
+                        </div>
+                        <a href="#contact" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full text-center transition-colors duration-300 self-start">
+                            Spraw, by pojawił się tu!
+                        </a>
+                    </div>
+
+                    <!-- Projekt 3: Nowy Początek dla Twojego Biznesu -->
+                    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 h-full border border-gray-600 hover:border-teal-500">
+                        <img src="https://placehold.co/600x400/0F766E/FFFFFF?text=Nowy+Początek" alt="Miniaturka nowego, odświeżonego projektu" class="w-full h-48 object-cover rounded-lg mb-6 shadow-md">
+                        <h3 class="text-2xl font-bold mb-3 text-white">Nowy Początek dla Twojego Biznesu</h3>
+                        <p class="text-gray-300 mb-4 flex-grow">
+                            Każda wielka transformacja zaczyna się od pierwszego kroku. Jestem tutaj, aby pomóc Twojej firmie zbudować silną obecność online.
+                        </p>
+                        <div class="flex flex-wrap gap-2 text-sm text-gray-400 mb-4">
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Dopasowanie</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Wsparcie</span>
+                            <span class="bg-gray-600 px-3 py-1 rounded-full">Rozwój</span>
+                        </div>
+                        <a href="#contact" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full text-center transition-colors duration-300 self-start">
+                            Zacznijmy współpracę!
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Stopka -->
+    <footer class="bg-gray-900 text-gray-400 text-center py-8 px-4 rounded-t-xl shadow-inner mt-12">
+        <p>&copy; 2024 Twoje Portfolio Webowe. Wszelkie prawa zastrzeżone.</p>
+        <div class="mt-4 flex justify-center space-x-6">
+            <a href="https://linkedin.com/in/twoj-profil" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-teal-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500">LinkedIn</a>
+            <a href="https://github.com/twoj-profil" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-teal-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500">GitHub</a>
+            <!-- Dodaj inne linki do mediów społecznościowych/Behance jeśli masz -->
+        </div>
+    </footer>
+
+    <!-- Przycisk "Przewiń do góry" -->
+    <button id="scrollTopBtn" aria-label="Przewiń do góry">
+        ↑
+    </button>
+
+    <!-- Telefon dla urządzeń mobilnych (Fixed on Mobile, obok treści, po prawej) -->
+    <a href="tel:+48123456789" id="mobilePhoneBtn" class="fixed right-4 top-1/2 -translate-y-1/2 bg-teal-500 hover:bg-teal-600 text-white p-3 rounded-full shadow-lg flex items-center justify-center text-lg font-semibold transition-all duration-300 transform hover:scale-110 z-50 md:hidden" aria-label="Zadzwoń do mnie">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06L6.22 9.873a11.002 11.002 0 004.908 4.908l1.503-1.124a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2.153a15.908 15.908 0 01-12.052-12.052H2a1 1 0 01-1-1z" />
+        </svg>
+    </a>
+
+    <!-- Przycisk "KONTAKT" na desktop, przesuwany z treścią (po prawej na środku) -->
+    <a href="#contact" id="desktopContactBtn" class="fixed top-1/2 -translate-y-1/2 rotate-[-90deg] bg-teal-600 text-white py-3 px-4 rounded-lg shadow-lg font-bold transition-all duration-500 z-50 hidden lg:block" aria-label="Skontaktuj się ze mną">
+        KONTAKT
+    </a>
+
+    <!-- Skrypt dla mobilnego menu i animacji przewijania -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('menuButton');
+            const navLinks = document.getElementById('navLinks');
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            const header = document.querySelector('header');
+            const body = document.body;
+
+            // Sprawdzenie, czy wszystkie kluczowe elementy zostały znalezione
+            if (!menuButton || !navLinks || !header || !scrollTopBtn) {
+                console.error("Błąd: Nie znaleziono wszystkich wymaganych elementów DOM. Upewnij się, że ID są poprawne.");
+                // Możesz tu dodać dalsze instrukcje lub zakończyć działanie skryptu
+                return;
+            }
+
+            // Funkcja do dynamicznego dostosowywania paddingu body
+            // Zapewnia, że treść strony nie jest zasłonięta przez przypięty nagłówek
+            function adjustBodyPadding() {
+                if (header) { // Upewnij się, że header istnieje
+                    body.style.paddingTop = header.offsetHeight + 'px';
+                }
+            }
+
+            // Funkcja do aktualizacji pozycji i wysokości menu mobilnego
+            function updateMobileMenuPosition() {
+                if (navLinks.classList.contains('active') && header) {
+                    const headerOffset = header.offsetHeight;
+                    navLinks.style.top = headerOffset + 'px';
+                    navLinks.style.height = `calc(100vh - ${headerOffset}px)`;
+                }
+            }
+
+            // Wywołaj dostosowanie paddingu po załadowaniu DOM i przy zmianie rozmiaru okna
+            adjustBodyPadding();
+            window.addEventListener('resize', () => {
+                adjustBodyPadding();
+                updateMobileMenuPosition(); // Zaktualizuj pozycję menu po zmianie rozmiaru
+            });
+
+            // Funkcja do przełączania klasy 'active' w menu mobilnym
+            menuButton.addEventListener('click', function() {
+                const isActive = navLinks.classList.toggle('active');
+                this.setAttribute('aria-expanded', isActive); // Zaktualizuj atrybut ARIA
+
+                if (isActive) {
+                    updateMobileMenuPosition(); // Ustaw pozycję i wysokość przy otwieraniu
+                    body.classList.add('overflow-hidden'); // Zablokuj przewijanie tła
+                } else {
+                    // Pozwól na animację przed usunięciem stylów inline
+                    setTimeout(() => {
+                        navLinks.style.height = ''; // Wyzeruj wysokość
+                        navLinks.style.top = '';   // Wyzeruj pozycję top
+                    }, 300); // Czas trwania animacji CSS
+                    body.classList.remove('overflow-hidden'); // Odblokuj przewijanie tła
+                }
+
+                // Logi do konsoli dla debugowania
+                console.log('--- Menu Toggled ---');
+                console.log('Menu aktywne:', isActive);
+                console.log('Header Offset Height:', header.offsetHeight);
+                console.log('Nav Links Top (computed):', navLinks.style.top);
+                console.log('Nav Links Height (computed):', navLinks.style.height);
+                console.log('Nav Links Display (computed):', window.getComputedStyle(navLinks).display);
+                console.log('----------------------');
+            });
+
+            // Ukryj menu po kliknięciu na link (tylko na mobilnych)
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        menuButton.setAttribute('aria-expanded', 'false'); // Zaktualizuj atrybut ARIA
+                        // Pozwól na animację przed usunięciem stylów inline
+                        setTimeout(() => {
+                            navLinks.style.height = '';
+                            navLinks.style.top = '';
+                        }, 300); // Czas trwania animacji CSS
+                        body.classList.remove('overflow-hidden'); // Odblokuj przewijanie tła
+                    }
+                });
+            });
+
+            // Płynne przewijanie do sekcji z uwzględnieniem wysokości nagłówka
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        const headerOffset = header.offsetHeight;
+                        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                        const offsetPosition = elementPosition - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+
+            // Logika dla przycisku "Przewiń do góry"
+            window.addEventListener('scroll', () => {
+                const scrolled = window.scrollY;
+
+                if (scrolled > 300) {
+                    scrollTopBtn.classList.add('show');
+                } else {
+                    scrollTopBtn.classList.remove('show');
+                }
+            });
+
+            // Wywołaj scroll event raz, aby sprawdzić początkowy stan przycisku "Przewiń do góry"
+            window.dispatchEvent(new Event('scroll'));
+        });
+    </script>
+</body>
+</html>
