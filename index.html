@@ -11,7 +11,10 @@
     <!-- Konfiguracja Tailwind CSS z niestandardową czcionką Inter -->
     <style>
         @import url('https://rsms.me/inter/inter.css');
-        html { font-family: 'Inter', sans-serif; }
+        html {
+            font-family: 'Inter', sans-serif;
+            --header-height: 0px; /* CSS variable for header height */
+        }
         @supports (font-variation-settings: normal) {
             html { font-family: 'Inter var', sans-serif; }
         }
@@ -268,8 +271,8 @@
 
         /*
         STRATEGIA DLA NAGŁÓWKA:
-        Nagłówek jest fixed i zawsze widoczny. Obraz banner.jpg jest jego tłem.
-        Brak box-shadow bezpośrednio na headerze.
+        Nagłówek jest fixed i zawsze widoczny, z jednolitym tłem i cieniem od początku.
+        Brak dynamicznych zmian tła na scrollu.
         */
         header {
             position: fixed; /* PRZYPIĘTY DO GÓRY EKRANU */
@@ -277,11 +280,17 @@
             z-index: 100; /* Wysoki z-index dla nagłówka */
             top: 0;
             left: 0;
+            /* Added background color and box-shadow back */
+            background-color: rgba(31, 41, 55, 0.95); /* Ciemny, lekko przezroczysty kolor tła dla samego nagłówka */
+            backdrop-filter: blur(10px); /* Utrzymuje efekt rozmycia */
+            -webkit-backdrop-filter: blur(10px); /* Kompatybilność z WebKit */
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7); /* Przywrócony cień */
+            border-bottom-left-radius: 0.75rem; /* Zachowane istniejące zaokrąglenie */
+            border-bottom-right-radius: 0.75rem; /* Zachowane istniejące zaokrąglenie */
             overflow: hidden;
-            background-color: transparent; /* Nagłówek jest przezroczysty, tło zapewni pseudoelement */
         }
 
-        /* Pseudoelement ::before dla nagłówka - obraz banner.jpg (czysty plik) */
+        /* Pseudoelement ::before dla nagłówka - to on będzie zawierał obrazek tła i gradient cienia */
         header::before {
             content: '';
             position: absolute;
@@ -289,11 +298,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: url('banner.jpg'); /* Czysty obrazek tła */
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: cover;
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 25%), /* Gradient od dołu do 25% wysokości */
+                              url('banner.jpg'); /* Obrazek tła */
+            background-position: bottom, center center; /* Pozycjonowanie gradientu na dole, obrazka w centrum */
+            background-repeat: no-repeat, no-repeat;
+            background-size: 100% 100%, cover; /* Gradient na 100% wysokości, obrazek pokrywa resztę */
             z-index: -1; /* Umieść tło pod zawartością nagłówka */
+            opacity: 1;
         }
 
 
@@ -310,13 +321,16 @@
             min-height: auto;
             padding-top: 0; /* Zmieniono na 0 */
             padding-bottom: 0; /* Zmieniono na 0 */
+            margin-top: 0; /* Ensure no default margin top */
         }
 
         @media (min-width: 768px) { /* md breakpoint for desktop-like behavior */
             #home {
-                min-height: 100vh; /* Pełna wysokość widoku na desktopie */
-                padding-top: 5rem; /* Przywróć desktopowy padding */
-                padding-bottom: 5rem; /* Przywróć desktopowy padding */
+                /* Dynamically adjust min-height based on header height */
+                min-height: calc(100vh - var(--header-height));
+                padding-top: 0; /* Zmieniono na 0, aby zapobiec dodatkowej luce na desktopie */
+                padding-bottom: 0; /* Zmieniono na 0, aby zapobiec dodatkowej luce na desktopie */
+                margin-top: 0; /* Ensure no default margin top for desktop as well */
             }
         }
 
@@ -749,6 +763,8 @@
             function adjustBodyPadding() {
                 // Upewnij się, że padding jest dokładnie wysokością nagłówka
                 body.style.paddingTop = header.offsetHeight + 'px';
+                // Update CSS variable for header height
+                document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
             }
 
             // Funkcja do ustawiania pozycji menu mobilnego
